@@ -2,6 +2,7 @@ const menuButton = document.querySelector('.menu-toggle');
 const primaryNav = document.querySelector('#primary-nav');
 const navLinks = primaryNav ? primaryNav.querySelectorAll('a') : [];
 const desktopQuery = window.matchMedia('(min-width: 801px)');
+const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
 
 function setMenuState(isOpen) {
   if (!menuButton || !primaryNav) return;
@@ -17,7 +18,21 @@ menuButton?.addEventListener('click', () => {
 });
 
 navLinks.forEach((link) => {
-  link.addEventListener('click', () => setMenuState(false));
+  link.addEventListener('click', (event) => {
+    const targetId = link.getAttribute('href');
+    const target = targetId ? document.querySelector(targetId) : null;
+
+    setMenuState(false);
+
+    if (!target) return;
+
+    event.preventDefault();
+    target.scrollIntoView({
+      behavior: reducedMotionQuery.matches ? 'auto' : 'smooth',
+      block: 'start'
+    });
+    window.history.pushState(null, '', targetId);
+  });
 });
 
 document.addEventListener('keydown', (event) => {
